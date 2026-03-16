@@ -3,119 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3TX | أداة اختصار الروابط الرسمية</title>
+    <title>3TX | تحميل فيديوهات تيك توك</title>
     <style>
-        /* تصميم عصري وألوان سايبر بنك */
-        :root {
-            --main-color: #00f2ea; /* فيروزي تيك توك */
-            --accent-color: #ff0050; /* وردي تيك توك */
-            --bg-dark: #0f0f0f;
-            --card-bg: #1a1a1a;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .container {
-            background: var(--card-bg);
-            padding: 40px 20px;
-            border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            border: 1px solid #333;
-            position: relative;
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -2px; left: -2px; right: -2px; bottom: -2px;
-            background: linear-gradient(45deg, var(--main-color), var(--accent-color));
-            z-index: -1;
-            border-radius: 27px;
-            opacity: 0.3;
-        }
-
-        h1 {
-            font-size: 70px;
-            margin: 0;
-            font-style: italic;
-            font-weight: 900;
-            background: linear-gradient(to right, var(--main-color), var(--accent-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -3px;
-        }
-
-        p {
-            color: #aaa;
-            font-size: 16px;
-            margin-top: 5px;
-            margin-bottom: 30px;
-        }
-
-        .btn {
-            background: linear-gradient(45deg, var(--main-color), #00d1ca);
-            color: #000;
-            padding: 18px 45px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 20px;
-            display: inline-block;
-            transition: 0.4s;
-            box-shadow: 0 5px 15px rgba(0, 242, 234, 0.4);
-        }
-
-        .btn:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 10px 25px rgba(0, 242, 234, 0.6);
-            background: var(--accent-color);
-            color: white;
-        }
-
-        .ios-note {
-            margin-top: 25px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 13px;
-            color: #888;
-            line-height: 1.5;
-        }
-
-        .ios-note b {
-            color: var(--accent-color);
-        }
+        :root { --main: #00f2ea; --accent: #ff0050; --bg: #0f0f0f; }
+        body { background: var(--bg); color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: #1a1a1a; padding: 30px; border-radius: 20px; width: 90%; max-width: 450px; text-align: center; border: 1px solid #333; }
+        h1 { color: var(--main); font-size: 50px; margin: 0; font-style: italic; text-shadow: 2px 2px var(--accent); }
+        input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #444; background: #222; color: white; margin: 20px 0; box-sizing: border-box; outline: none; text-align: center; }
+        .btn { background: var(--main); color: #000; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; transition: 0.3s; }
+        .btn:hover { background: var(--accent); color: white; }
+        
+        #result { display: none; margin-top: 25px; background: #252525; padding: 20px; border-radius: 15px; border: 1px dashed var(--main); }
+        .loader { border: 4px solid #333; border-top: 4px solid var(--accent); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* تنبيه الأيفون */
+        .ios-tip { display: none; background: rgba(255, 0, 80, 0.1); color: #ff8fa3; padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 15px; border: 1px solid var(--accent); }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>3TX</h1>
-        <p>مرحباً بك في أداة التحميل والاختصار</p>
+<div class="container">
+    <h1>3TX</h1>
+    <p>تحميل فيديوهات تيك توك بدون علامة مائية</p>
+    
+    <input type="text" id="videoUrl" placeholder="الصق رابط الفيديو هنا...">
+    <button class="btn" id="dl-btn" onclick="fetchVideo()">جلب الفيديو</button>
+    
+    <div class="loader" id="loader"></div>
 
-        <a href="رابط_الموقع_المختصر_هنا" class="btn">دخول للأداة الآن</a>
-
-        <div class="ios-note">
-            <b>لمستخدمي iPhone:</b> عند فتح الرابط، اضغط مطولاً على الفيديو واختر "حفظ في الصور" إذا لم يبدأ التحميل تلقائياً.
-        </div>
+    <div id="result">
+        <p>تم تجهيز الفيديو بنجاح!</p>
+        <button class="btn" id="final-dl" onclick="startDownload()">تحميل الآن</button>
         
-        <div style="margin-top: 20px; font-size: 10px; color: #444;">
-            Version 2.0 | Secured by 3TX Cloud
+        <div class="ios-tip" id="ios-tip">
+            <b>مستخدم أيفون؟</b> إذا لم يبدأ التحميل، اضغط على الزر أعلاه، ثم من القائمة اختر <b>"حفظ في الملفات"</b> أو اضغط مطولاً على الفيديو واختر <b>"حفظ الفيديو"</b>.
         </div>
     </div>
+</div>
+
+<script>
+    let videoLink = "";
+
+    async function fetchVideo() {
+        const url = document.getElementById('videoUrl').value;
+        if (!url) return alert("يرجى وضع رابط!");
+
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('dl-btn').disabled = true;
+        document.getElementById('result').style.display = 'none';
+
+        try {
+            // استخدام API مجاني وسريع
+            const res = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`);
+            const data = await res.json();
+
+            if (data.code === 0) {
+                videoLink = data.data.play; // الرابط المباشر للفيديو
+                document.getElementById('result').style.display = 'block';
+                
+                // كشف إذا كان الجهاز أيفون
+                if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                    document.getElementById('ios-tip').style.display = 'block';
+                }
+            } else {
+                alert("تعذر جلب الفيديو، تأكد من الرابط.");
+            }
+        } catch (e) {
+            alert("حدث خطأ في الاتصال بالسيرفر.");
+        } finally {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('dl-btn').disabled = false;
+        }
+    }
+
+    function startDownload() {
+        if (!videoLink) return;
+
+        // الطريقة الأفضل للأيفون والأندرويد معاً
+        const a = document.createElement('a');
+        a.href = videoLink;
+        a.download = "3TX_Video.mp4"; // للأندرويد
+        a.target = "_blank"; // للأيفون حتى يفتح الفيديو بصفحة جديدة للحفظ
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+</script>
 
 </body>
 </html>
