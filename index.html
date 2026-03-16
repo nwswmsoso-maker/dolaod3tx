@@ -3,37 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3TX | التحميل السريع</title>
+    <title>3TX | التحميل الذكي</title>
     <style>
-        /* الألوان الوردية اللي تحبها */
         :root { --pink: #ff0050; --bg: #0a0a0a; --card: #161616; }
-        
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .box { background: var(--card); padding: 35px 25px; border-radius: 30px; width: 90%; max-width: 420px; text-align: center; border: 2px solid var(--pink); box-shadow: 0 0 20px rgba(255, 0, 80, 0.2); }
-        
-        h1 { color: var(--pink); font-size: 60px; margin: 0; font-style: italic; font-weight: 900; text-shadow: 3px 3px #00f2ea; }
-        p { color: #ccc; font-size: 14px; margin-bottom: 20px; }
-        
+        .box { background: var(--card); padding: 35px 25px; border-radius: 30px; width: 95%; max-width: 420px; text-align: center; border: 2px solid var(--pink); box-shadow: 0 0 20px rgba(255, 0, 80, 0.3); }
+        h1 { color: var(--pink); font-size: 60px; margin: 0; font-style: italic; font-weight: 900; text-shadow: 2px 2px #00f2ea; }
+        p { color: #888; font-size: 14px; margin-bottom: 25px; }
         input { width: 100%; padding: 18px; border-radius: 15px; border: 1px solid #333; background: #222; color: white; margin-bottom: 15px; box-sizing: border-box; outline: none; text-align: center; font-size: 16px; }
-        input:focus { border-color: var(--pink); box-shadow: 0 0 10px var(--pink); }
-        
-        .btn { background: var(--pink); color: white; padding: 16px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 0, 80, 0.4); }
+        .btn { background: var(--pink); color: white; padding: 16px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; width: 100%; font-size: 18px; transition: 0.3s; }
         .btn:active { transform: scale(0.95); }
-        
-        #result { display: none; margin-top: 25px; animation: fadeIn 0.5s; }
+        #result { display: none; margin-top: 25px; }
         .loader { border: 4px solid #222; border-top: 4px solid var(--pink); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
-        
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .ios-msg { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; font-size: 12px; color: #aaa; margin-top: 15px; }
+        .status-msg { font-size: 12px; color: #00f2ea; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="box">
     <h1>3TX</h1>
-    <p>أسرع أداة تحميل تيك توك وردية</p>
+    <p>تحميل تيك توك (أندرويد + أيفون)</p>
     
     <input type="text" id="urlInput" placeholder="الصق الرابط هنا...">
     <button class="btn" id="fetchBtn" onclick="getVideo()">جلب الفيديو</button>
@@ -41,22 +31,20 @@
     <div class="loader" id="loader"></div>
 
     <div id="result">
-        <button class="btn" style="background: #00f2ea; color: black;" onclick="downloadFile()">تنزيل الفيديو الآن</button>
-        <div class="ios-msg">
-            ملاحظة للأيفون: إذا لم يبدأ التنزيل، اضغط مطولاً على الزر واختر "تنزيل الملف المرتبط".
-        </div>
+        <button class="btn" id="dl-btn" style="background: #00f2ea; color: black;" onclick="handleDownload()">تنزيل الآن</button>
+        <div id="os-msg" class="status-msg"></div>
     </div>
 </div>
 
 <script>
-    let finalVideoUrl = "";
+    let currentVideoUrl = "";
+    let isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     async function getVideo() {
-        const input = document.getElementById('urlInput');
-        const url = input.value;
-        if (!url) return alert("حط رابط تيك توك!");
+        const inputField = document.getElementById('urlInput');
+        const url = inputField.value;
+        if (!url) return alert("حط الرابط أولاً!");
 
-        // إظهار اللودر وتعطيل الزر
         document.getElementById('loader').style.display = 'block';
         document.getElementById('fetchBtn').disabled = true;
         document.getElementById('result').style.display = 'none';
@@ -66,43 +54,54 @@
             const json = await response.json();
 
             if (json.code === 0) {
-                finalVideoUrl = json.data.play;
+                currentVideoUrl = json.data.play;
                 
-                // --- المطلب مالتك: حذف الرابط من الخانة فوراً ---
-                input.value = ""; 
+                // تم مسح الرابط من الخانة فوراً
+                inputField.value = ""; 
                 
                 document.getElementById('result').style.display = 'block';
+                document.getElementById('os-msg').innerText = isIOS ? "تم التجهيز لنظام iPhone" : "تم التجهيز لنظام Android";
             } else {
-                alert("الرابط غلط أو الفيديو خاص.");
+                alert("تأكد من الرابط!");
             }
         } catch (err) {
-            alert("اكو مشكلة بالاتصال.");
+            alert("خطأ في الاتصال.");
         } finally {
             document.getElementById('loader').style.display = 'none';
             document.getElementById('fetchBtn').disabled = false;
         }
     }
 
-    // وظيفة التحويل لـ Blob لحل مشكلة الأيفون
-    async function downloadFile() {
-        if (!finalVideoUrl) return;
+    async function handleDownload() {
+        if (!currentVideoUrl) return;
 
-        // محاولة التحميل كـ Blob لإجبار الأيفون على التنزيل
-        try {
-            const res = await fetch(finalVideoUrl);
-            const blob = await res.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            
+        if (isIOS) {
+            // --- برمجة الأيفون (Blob) ---
+            try {
+                const res = await fetch(currentVideoUrl);
+                const blob = await res.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = "3TX_Video.mp4";
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(blobUrl);
+            } catch (e) {
+                window.open(currentVideoUrl, '_blank');
+            }
+        } else {
+            // --- برمجة الأندرويد (Direct Link) ---
+            // الأندرويد يحتاج رابط مباشر حتى يبدأ التحميل بالنظام
             const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = "3TX_Video_" + Date.now() + ".mp4";
+            a.href = currentVideoUrl;
+            // إضافة برامتر لإجبار التحميل في بعض متصفحات أندرويد
+            const downloadUrl = currentVideoUrl + (currentVideoUrl.includes('?') ? '&' : '?') + 'download=1';
+            a.href = downloadUrl;
+            a.setAttribute('download', '3TX_Video.mp4');
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            window.URL.revokeObjectURL(blobUrl);
-        } catch (e) {
-            // إذا فشل الـ Blob (بسبب الحماية)، نفتح الرابط بتبويب جديد
-            window.open(finalVideoUrl, '_blank');
         }
     }
 </script>
